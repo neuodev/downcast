@@ -66,7 +66,7 @@ export class EpisodeDownloader {
     for (let chunkIdx = 0; chunkIdx < asChuncks.length; chunkIdx++) {
       const bar = new cliProgress.MultiBar(
         {
-          format: " {bar} | {filename} | {value}/{total}",
+          format: "{bar} | {filename} | {value}/{total}",
         },
         cliProgress.Presets.shades_classic
       );
@@ -81,7 +81,6 @@ export class EpisodeDownloader {
           )
         )
       );
-      bar.stop();
     }
   }
 
