@@ -16,20 +16,21 @@ export class EpisodeDownloader {
     multibar: MultiBar,
     prefix = ""
   ) {
+    const podcastPath = path.join(this.outDir, podcastName);
+    if (!fs.existsSync(podcastPath)) fs.mkdirSync(podcastPath);
+
+    const episodePath = path.join(
+      podcastPath,
+      prefix + episode.name.replace(/\//gi, "-") + ".mp4"
+    );
+    if (fs.existsSync(episodePath)) return;
+
     const barPayload = {
       filename: `${prefix}${podcastName} / ${episode.name}`,
     };
     const bar = multibar.create(100, 0, barPayload);
+
     try {
-      const podcastPath = path.join(this.outDir, podcastName);
-      if (!fs.existsSync(podcastPath)) fs.mkdirSync(podcastPath);
-
-      const episodePath = path.join(
-        podcastPath,
-        prefix + episode.name.replace(/\//gi, "-") + ".mp4"
-      );
-      if (fs.existsSync(episodePath)) return;
-
       const { data } = await axios.get<ArrayBuffer>(episode.audioUrl, {
         responseType: "arraybuffer",
         onDownloadProgress: (progressEvent) => {
@@ -62,14 +63,13 @@ export class EpisodeDownloader {
     const asChuncks: Array<Array<PodcastEpisode>> = [];
     while (copy.length) asChuncks.push(copy.splice(0, parallel));
 
-    const bar = new cliProgress.MultiBar(
-      {
-        format: " {bar} | {filename} | {value}/{total}",
-      },
-      cliProgress.Presets.shades_classic
-    );
-
     for (let chunkIdx = 0; chunkIdx < asChuncks.length; chunkIdx++) {
+      const bar = new cliProgress.MultiBar(
+        {
+          format: " {bar} | {filename} | {value}/{total}",
+        },
+        cliProgress.Presets.shades_classic
+      );
       const chunk = asChuncks[chunkIdx];
       await Promise.all(
         chunk.map((episode, idx) =>
@@ -81,8 +81,8 @@ export class EpisodeDownloader {
           )
         )
       );
+      bar.stop();
     }
-    bar.stop();
   }
 
   public async downloadPodcast(podcast: string, storage: Storage) {
