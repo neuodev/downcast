@@ -1,0 +1,16 @@
+{
+  "name": "downcast",
+  "version": "1.0.0",
+  "description": "CLI based tool to interact with Taddy's Podcast API",
+  "main": "index.js",
+  "author": "Ahmed Ibrahim",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
