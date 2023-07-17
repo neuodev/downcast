@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
 import { Podcast } from "./podcast";
 import { Storage } from "./storage";
+import { EpisodeDownloader } from "./downloader";
 import axios from "axios";
+import { PodcastEpisode } from "./types";
 
 dotenv.config({});
 
@@ -11,13 +13,17 @@ async function main() {
   if (!userId) throw new Error('Missing "TADDY_USER_ID" environment variables');
   if (!apiKey) throw new Error('Missing "TADDY_API_KEY" environment variables');
 
-  const podcast = new Podcast(userId, apiKey);
   const storage = new Storage("cache/");
 
-  const query = "The Tim Ferriss Show";
-  const result = await podcast.getPodcastEpisodes(query);
-  storage.save(query, result);
-  console.log({ result });
+  const query = "Huberman Lab";
+  //   const podcast = new Podcast(userId, apiKey);
+  //   const episodes = await podcast.getPodcastEpisodes(query);
+  //   storage.save(query, episodes);
+
+  const result = storage.load<PodcastEpisode[]>(query);
+  if (!result) throw new Error("Query is not cached");
+  const downloader = new EpisodeDownloader("downloads");
+  await downloader.downloadPodcast(query, storage);
 }
 
 main()

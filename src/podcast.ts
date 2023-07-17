@@ -28,6 +28,8 @@ export class Podcast {
         }
       `);
 
+    console.log(`${name}: ${getPodcastSeries.totalEpisodesCount} episode(s)`);
+
     const pageLimit = 25;
     const pageCount = Math.ceil(
       getPodcastSeries.totalEpisodesCount / pageLimit
@@ -35,6 +37,8 @@ export class Podcast {
     const episodes: Array<PodcastEpisode> = [];
 
     for (let page = 1; page <= pageCount; page++) {
+      console.log(`${name}: ${page}/${pageCount}`);
+
       const result = await this.makeQuery<{
         getPodcastSeries: { uuid: string; episodes: Array<PodcastEpisode> };
       }>(`

@@ -18,7 +18,7 @@ export class Storage {
     fs.writeFileSync(this.asFileName(query), JSON.stringify(result, null, 2));
   }
 
-  private asFileName(query: string) {
+  public asFileName(query: string) {
     const fileName = query.replace(/'|\s/gi, "_").toLowerCase() + ".json";
     return path.join(this.outDir, fileName);
   }
