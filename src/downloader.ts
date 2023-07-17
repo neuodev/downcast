@@ -16,28 +16,38 @@ export class EpisodeDownloader {
     multibar: MultiBar,
     prefix = ""
   ) {
-    const podcastPath = path.join(this.outDir, podcastName);
-    if (!fs.existsSync(podcastPath)) fs.mkdirSync(podcastPath);
-
-    const episodePath = path.join(podcastPath, prefix + episode.name + ".mp4");
-    if (fs.existsSync(episodePath)) return;
-
     const barPayload = {
       filename: `${prefix}${podcastName} / ${episode.name}`,
     };
     const bar = multibar.create(100, 0, barPayload);
+    try {
+      const podcastPath = path.join(this.outDir, podcastName);
+      if (!fs.existsSync(podcastPath)) fs.mkdirSync(podcastPath);
 
-    const { data } = await axios.get<ArrayBuffer>(episode.audioUrl, {
-      responseType: "arraybuffer",
-      onDownloadProgress: (progressEvent) => {
-        const progress = progressEvent.progress
-          ? Number((progressEvent.progress * 100).toFixed(2))
-          : 0;
-        bar.update(progress, barPayload);
-      },
-    });
+      const episodePath = path.join(
+        podcastPath,
+        prefix + episode.name.replace(/\//gi, "-") + ".mp4"
+      );
+      if (fs.existsSync(episodePath)) return;
 
-    fs.writeFileSync(episodePath, Buffer.from(data));
+      const { data } = await axios.get<ArrayBuffer>(episode.audioUrl, {
+        responseType: "arraybuffer",
+        onDownloadProgress: (progressEvent) => {
+          const progress = progressEvent.progress
+            ? Number((progressEvent.progress * 100).toFixed(2))
+            : 0;
+          bar.update(progress, barPayload);
+        },
+      });
+
+      fs.writeFileSync(episodePath, Buffer.from(data));
+    } catch (error) {
+      console.log(
+        `EpisodeDownloader::downloadOne::${
+          error instanceof Error ? error.message : error
+        }`
+      );
+    }
 
     bar.stop();
     multibar.remove(bar);
